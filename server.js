@@ -8,12 +8,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Database connection
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
+
+const url = process.env.DB_URL;
+const db = mysql.createConnection(url);
 
 db.connect(err => {
     if (err) {
@@ -22,20 +19,21 @@ db.connect(err => {
         console.log("Connected to MySQL");
     }
 });
-
+// module.exports=db;
 app.get("/", (req, res) => {
     res.send("School Management API is running!");
   });
 // Add School API
 app.post("/addSchool", (req, res) => {
-     console.log("in add schooll endpoint");
+     console.log("in add school endpoint");
+
     const { name, address, latitude, longitude } = req.body;
 
     if (!name || !address || latitude == null || longitude == null) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    const query = "INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)";
+    const query = "INSERT INTO school (name, address, latitude, longitude) VALUES (?, ?, ?, ?)";
     db.query(query, [name, address, latitude, longitude], (err, result) => {
         if (err) {
             return res.status(500).json({ message: "Database error", error: err });
@@ -53,7 +51,7 @@ app.get("/listSchools", (req, res) => {
         return res.status(400).json({ message: "Latitude and longitude are required" });
     }
 
-    const query = "SELECT * FROM schools";
+    const query = "SELECT * FROM school";
     db.query(query, (err, schools) => {
         if (err) {
             return res.status(500).json({ message: "Database error", error: err });
